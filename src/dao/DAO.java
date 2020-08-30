@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 import models.Dia;
 import models.Fechamento;
 import models.Saida;
+import models.SaidaBeth;
 
 public class DAO {
 
@@ -73,18 +74,9 @@ public class DAO {
 
             ps.setInt(1, idDia);
             ps.executeUpdate();
-            
+
             insertSaidas(conn, fechamento.getIdFechamento(), fechamento.getSaidas());
-            /*
-            sql = "INSERT INTO saida(idFechamento, descricao, valor) VALUES (?, ?, ?)";
-            ps = conn.prepareStatement(sql);
-            for (Saida s : fechamento.getSaidas()) {
-                ps.setInt(1, fechamento.getIdFechamento());
-                ps.setString(2, s.getDescricao());
-                ps.setFloat(3, s.getValor());
-                ps.executeUpdate();
-            }
-             */
+            insertSaidasBeth(conn, fechamento.getIdFechamento(), fechamento.getSaidasBeth());
 
             conn.close();
 
@@ -108,28 +100,28 @@ public class DAO {
             ps.setInt(5, fechamento.getIdFechamento());
 
             ps.executeUpdate();
-            
-            
+
             sql = "DELETE FROM saida WHERE idFechamento = ?";
             ps = conn.prepareStatement(sql);
-            
+
             ps.setInt(1, fechamento.getIdFechamento());
-            
+
             ps.executeUpdate();
-            
+
             insertSaidas(conn, fechamento.getIdFechamento(), fechamento.getSaidas());
-            
-            
-            sql = "DELETE FROM ficaCaixa WHERE idFechamento = ?";
+
+            sql = "DELETE FROM saidaBeth WHERE idFechamento = ?";
             ps = conn.prepareStatement(sql);
-            
+
             ps.setInt(1, fechamento.getIdFechamento());
-            
+
             ps.executeUpdate();
             
+            insertSaidasBeth(conn, fechamento.getIdFechamento(), fechamento.getSaidasBeth());
             
+
             conn.close();
-            
+
             return true;
         } catch (SQLException ex) {
             Logger.getLogger(DAO.class.getName()).log(Level.SEVERE, null, ex);
@@ -149,17 +141,6 @@ public class DAO {
             while (rsFechamentos.next()) {
                 int idFechamento = rsFechamentos.getInt("idFechamento");
 
-                ArrayList<Saida> arraySaidas = new ArrayList<Saida>();
-                rsAux = stmt.executeQuery("SELECT * from saida WHERE idFechamento = " + String.valueOf(idFechamento));
-                while (rsAux.next()) {
-                    arraySaidas.add(new Saida(
-                            rsAux.getInt("idSaida"),
-                            idFechamento,
-                            rsAux.getString("descricao"),
-                            rsAux.getFloat("valor")
-                    ));
-                }
-
                 arrayFechamentos.add(new Fechamento(
                         idFechamento,
                         rsFechamentos.getInt("idDia"),
@@ -168,7 +149,8 @@ public class DAO {
                         rsFechamentos.getFloat("valorCaixa"),
                         rsFechamentos.getFloat("valorDisplay"),
                         rsFechamentos.getFloat("cartao"),
-                        arraySaidas.toArray(new Saida[0])
+                        selectSaidasFromFechamento(conn, idFechamento),
+                        selectSaidasBethFromFechamento(conn, idFechamento)
                 ));
             }
 
@@ -247,7 +229,8 @@ public class DAO {
                             rsFechamento.getFloat("valorCaixa"),
                             rsFechamento.getFloat("valorDisplay"),
                             rsFechamento.getFloat("cartao"),
-                            selectSaidasFromFechamento(conn, idFechamentoManha)
+                            selectSaidasFromFechamento(conn, idFechamentoManha),
+                            selectSaidasBethFromFechamento(conn, idFechamentoManha)
                     );
                 } else {
                     fechamentoManha = null;
@@ -266,7 +249,8 @@ public class DAO {
                             rsFechamento.getFloat("valorCaixa"),
                             rsFechamento.getFloat("valorDisplay"),
                             rsFechamento.getFloat("cartao"),
-                            selectSaidasFromFechamento(conn, idFechamentoTarde)
+                            selectSaidasFromFechamento(conn, idFechamentoTarde),
+                            selectSaidasBethFromFechamento(conn, idFechamentoTarde)
                     );
                 } else {
                     fechamentoTarde = null;
@@ -291,7 +275,7 @@ public class DAO {
         return null;
     }
 
-    private static boolean insertSaidas(Connection conn, int idFechamento,  Saida[] saidas) {
+    private static boolean insertSaidas(Connection conn, int idFechamento, Saida[] saidas) {
         try {
             String sql = "INSERT INTO saida(idFechamento, descricao, valor) VALUES (?, ?, ?)";
             PreparedStatement ps = conn.prepareStatement(sql);
@@ -306,7 +290,7 @@ public class DAO {
         } catch (SQLException ex) {
             Logger.getLogger(DAO.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         return false;
     }
 
@@ -331,6 +315,47 @@ public class DAO {
         return null;
     }
 
+    private static boolean insertSaidasBeth(Connection conn, int idFechamento, SaidaBeth[] saidasBeth) {
+        try {
+            String sql = "INSERT INTO saidaBeth(idFechamento, descricao, valor) VALUES (?, ?, ?)";
+            PreparedStatement ps = conn.prepareStatement(sql);
+
+            for (SaidaBeth sb : saidasBeth) {
+                ps.setInt(1, idFechamento);
+                ps.setString(2, sb.getDescricao());
+                ps.setFloat(3, sb.getValor());
+                ps.executeUpdate();
+            }
+            
+            return true;
+        } catch (SQLException ex) {
+            Logger.getLogger(DAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return false;
+    }
+
+    private static SaidaBeth[] selectSaidasBethFromFechamento(Connection conn, int idFechamento) {
+        try {
+            ArrayList<SaidaBeth> arraySaidasBeth = new ArrayList<SaidaBeth>();
+            Statement stmt = conn.createStatement();
+            ResultSet rsAux = stmt.executeQuery("SELECT * from saidaBeth WHERE idFechamento = " + String.valueOf(idFechamento));
+            while (rsAux.next()) {
+                arraySaidasBeth.add(new SaidaBeth(
+                        rsAux.getInt("idSaidaBeth"),
+                        rsAux.getInt("idFechamento"),
+                        rsAux.getString("descricao"),
+                        rsAux.getFloat("valor")
+                ));
+            }
+
+            return arraySaidasBeth.toArray(new SaidaBeth[0]);
+        } catch (SQLException ex) {
+            Logger.getLogger(DAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+
     public static String selectDataFromDia(int idDia) {
         try {
             Connection conn = DriverManager.getConnection(dbPath);
@@ -338,9 +363,9 @@ public class DAO {
 
             ps.setInt(1, idDia);
             ResultSet rs = ps.executeQuery();
-            
+
             String data = rs.getString("data");
-            
+
             conn.close();
 
             return data;

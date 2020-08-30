@@ -21,7 +21,8 @@ public class Dia {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         String strData = sdf.format(this.data.getTime());
         
-        float total = (fechamentoManha == null ? 0 : fechamentoManha.getValorTotal()) + (fechamentoTarde == null ? 0 : fechamentoTarde.getValorTotal());
+        float totalFaturamento = (fechamentoManha == null ? 0 : fechamentoManha.getValorTotal()) + (fechamentoTarde == null ? 0 : fechamentoTarde.getValorTotal());
+        float totalSaida = (fechamentoManha == null ? 0 : fechamentoManha.getTotalSaidas()) + (fechamentoTarde == null ? 0 : fechamentoTarde.getTotalSaidas());
         
         return new Object[]{
             strData,
@@ -29,7 +30,8 @@ public class Dia {
             fechamentoManha == null ? "" : valorParaString(fechamentoManha.getTotalSaidas()),
             fechamentoTarde == null ? "" : valorParaString(fechamentoTarde.getValorTotal()),
             fechamentoTarde == null ? "" : valorParaString(fechamentoTarde.getTotalSaidas()),
-            valorParaString(total)
+            valorParaString(totalFaturamento),
+            valorParaString(totalSaida)
         };
     }
     

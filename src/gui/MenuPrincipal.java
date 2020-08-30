@@ -118,11 +118,11 @@ public class MenuPrincipal extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Data", "Total Manhã", "Saída Manhã", "Total Tarde", "Saída Tarde", "Total"
+                "Data", "Faturamento Manhã", "Saída Manhã", "Faturamento Tarde", "Saída Tarde", "Total Faturamento", "Total Saídas"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false
+                false, false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -130,6 +130,9 @@ public class MenuPrincipal extends javax.swing.JFrame {
             }
         });
         jScrollPane1.setViewportView(tabelaFechamentos);
+        if (tabelaFechamentos.getColumnModel().getColumnCount() > 0) {
+            tabelaFechamentos.getColumnModel().getColumn(0).setPreferredWidth(50);
+        }
 
         jLabel1.setFont(new java.awt.Font("Noto Sans", 1, 18)); // NOI18N
         jLabel1.setText("Busca:");
@@ -235,7 +238,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(botaoMaisInformacoes, javax.swing.GroupLayout.DEFAULT_SIZE, 212, Short.MAX_VALUE)
+                    .addComponent(botaoMaisInformacoes, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(botaoNovoFechamento, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(botaoRelatorio, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
@@ -258,18 +261,16 @@ public class MenuPrincipal extends javax.swing.JFrame {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 600, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 746, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel1)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addComponent(botaoLimpar)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(18, 18, 18)
                         .addComponent(botaoBuscar))
-                    .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel1)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -322,13 +323,13 @@ public class MenuPrincipal extends javax.swing.JFrame {
 
             if (reply == 0) {
                 if (diaSelecionado.getFechamentoManha() != null) {
-                    new MaisInfoFechamento(diaSelecionado.getFechamentoManha()).setVisible(true);
+                    new MaisInfoFechamento(this, diaSelecionado.getFechamentoManha()).setVisible(true);
                 } else {
                     JOptionPane.showMessageDialog(null, "Este fechamento de caixa não está cadastrado.", "Atenção", JOptionPane.WARNING_MESSAGE);
                 }
             } else if (reply == 1) {
                 if (diaSelecionado.getFechamentoTarde() != null) {
-                    new MaisInfoFechamento(diaSelecionado.getFechamentoTarde()).setVisible(true);
+                    new MaisInfoFechamento(this, diaSelecionado.getFechamentoTarde()).setVisible(true);
                 } else {
                     JOptionPane.showMessageDialog(null, "Este fechamento de caixa não está cadastrado.", "Atenção", JOptionPane.WARNING_MESSAGE);
                 }

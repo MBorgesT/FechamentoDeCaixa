@@ -1,24 +1,25 @@
 package gui;
 
 import dao.DAO;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import models.Fechamento;
 import models.Saida;
+import models.SaidaBeth;
 import validators.FechamentoFormValidator;
 
 public class MaisInfoFechamento extends javax.swing.JFrame {
 
+    private MenuPrincipal menuPrincipal;
     private Fechamento fechamento;
     private boolean editando;
 
-    public MaisInfoFechamento(Fechamento fechamento) {
+    public MaisInfoFechamento(MenuPrincipal menuPrincipal, Fechamento fechamento) {
         initComponents();
 
+        this.menuPrincipal = menuPrincipal;
         this.fechamento = fechamento;
         this.editando = false;
 
@@ -27,6 +28,7 @@ public class MaisInfoFechamento extends javax.swing.JFrame {
         realizarCalculos();
 
         tabelaSaidas.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
+        tabelaSaidasBeth.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
     }
 
     private void camposEditaveis(boolean b) {
@@ -36,6 +38,7 @@ public class MaisInfoFechamento extends javax.swing.JFrame {
         campoCartao.setEditable(b);
 
         tabelaSaidas.setEnabled(b);
+        tabelaSaidasBeth.setEnabled(b);
     }
 
     private void enableBotoes(boolean b) {
@@ -43,6 +46,9 @@ public class MaisInfoFechamento extends javax.swing.JFrame {
 
         botaoAdicionarSaida.setEnabled(b);
         botaoRemoverSaida.setEnabled(b);
+        
+        botaoAdicionarSaidaBeth.setEnabled(b);
+        botaoRemoverSaidaBeth.setEnabled(b);
 
         botaoCancelarEdicao.setEnabled(b);
     }
@@ -63,15 +69,19 @@ public class MaisInfoFechamento extends javax.swing.JFrame {
         campoValorDisplay.setText(valorParaString(fechamento.getValorDisplay()));
         campoCartao.setText(valorParaString(fechamento.getCartao()));
 
-        preencherTabela();
+        preencherTabelas();
     }
 
-    private void preencherTabela() {
+    private void preencherTabelas() {
         DefaultTableModel saidaModel = (DefaultTableModel) tabelaSaidas.getModel();
         saidaModel.setRowCount(0);
-        for (Saida saida : fechamento.getSaidas()) {
+        for (Saida saida : fechamento.getSaidas()) 
             saidaModel.addRow(saida.saidaParaTabela());
-        }
+        
+        DefaultTableModel saidaBethModel = (DefaultTableModel) tabelaSaidasBeth.getModel();
+        saidaBethModel.setRowCount(0);
+        for (SaidaBeth sb : fechamento.getSaidasBeth())
+            saidaBethModel.addRow(sb.saidaParaTabela());
     }
 
     private float stringParaValor(String valor) {
@@ -103,12 +113,17 @@ public class MaisInfoFechamento extends javax.swing.JFrame {
 
         DefaultTableModel saidasModel = (DefaultTableModel) tabelaSaidas.getModel();
         float saida = 0;
-        for (int i = 0; i < saidasModel.getRowCount(); i++) {
+        for (int i = 0; i < saidasModel.getRowCount(); i++)
             saida += stringParaValor(String.valueOf(saidasModel.getValueAt(i, 1)));
-        }
         campoTotalSaidas.setText(valorParaString(saida));
+        
+        DefaultTableModel saidasBethModel = (DefaultTableModel) tabelaSaidasBeth.getModel();
+        float saidaBeth = 0;
+        for (int i = 0; i < saidasBethModel.getRowCount(); i++)
+            saidaBeth += stringParaValor(String.valueOf(saidasBethModel.getValueAt(i, 1)));
+        campoTotalSaidasBeth.setText(valorParaString(saidaBeth));
 
-        float diferenca = (valorCaixa + saida + cartao) - (entrada + valorDisplay);
+        float diferenca = (valorCaixa + saida + saidaBeth + cartao) - (entrada + valorDisplay);
 
         campoDiferenca.setText(valorParaString(diferenca));
     }
@@ -140,6 +155,14 @@ public class MaisInfoFechamento extends javax.swing.JFrame {
         jLabel12 = new javax.swing.JLabel();
         campoCartao = new javax.swing.JTextField();
         jSeparator1 = new javax.swing.JSeparator();
+        scrollPaneSaidasBeth = new javax.swing.JScrollPane();
+        tabelaSaidasBeth = new javax.swing.JTable();
+        jLabel6 = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        campoTotalSaidasBeth = new javax.swing.JTextField();
+        botaoRemoverSaidaBeth = new javax.swing.JButton();
+        botaoAdicionarSaidaBeth = new javax.swing.JButton();
+        jSeparator2 = new javax.swing.JSeparator();
         labelId = new javax.swing.JLabel();
         jLabel11 = new javax.swing.JLabel();
         campoDiferenca = new javax.swing.JTextField();
@@ -256,61 +279,166 @@ public class MaisInfoFechamento extends javax.swing.JFrame {
         campoCartao.setFont(new java.awt.Font("Noto Sans", 0, 14)); // NOI18N
         campoCartao.setName("campoCartao"); // NOI18N
 
-        jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
+        scrollPaneSaidasBeth.setName("scrollPaneSaidasBeth"); // NOI18N
+
+        tabelaSaidasBeth.setFont(new java.awt.Font("Noto Sans", 0, 14)); // NOI18N
+        tabelaSaidasBeth.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Descrição", "Valor (R$)"
+            }
+        ));
+        tabelaSaidasBeth.setEnabled(false);
+        tabelaSaidasBeth.setName("tabelaSaidasBeth"); // NOI18N
+        scrollPaneSaidasBeth.setViewportView(tabelaSaidasBeth);
+        if (tabelaSaidasBeth.getColumnModel().getColumnCount() > 0) {
+            tabelaSaidasBeth.getColumnModel().getColumn(0).setPreferredWidth(250);
+            tabelaSaidasBeth.getColumnModel().getColumn(1).setPreferredWidth(90);
+        }
+
+        jLabel6.setFont(new java.awt.Font("Noto Sans", 1, 14)); // NOI18N
+        jLabel6.setText("Saídas para a Beth:");
+
+        jLabel8.setFont(new java.awt.Font("Noto Sans", 1, 14)); // NOI18N
+        jLabel8.setText("Total:");
+
+        campoTotalSaidasBeth.setEditable(false);
+        campoTotalSaidasBeth.setFont(new java.awt.Font("Noto Sans", 0, 14)); // NOI18N
+
+        botaoRemoverSaidaBeth.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/minus.png"))); // NOI18N
+        botaoRemoverSaidaBeth.setBorder(null);
+        botaoRemoverSaidaBeth.setBorderPainted(false);
+        botaoRemoverSaidaBeth.setContentAreaFilled(false);
+        botaoRemoverSaidaBeth.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                botaoRemoverSaidaBethActionPerformed(evt);
+            }
+        });
+
+        botaoAdicionarSaidaBeth.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/plus.png"))); // NOI18N
+        botaoAdicionarSaidaBeth.setBorder(null);
+        botaoAdicionarSaidaBeth.setBorderPainted(false);
+        botaoAdicionarSaidaBeth.setContentAreaFilled(false);
+        botaoAdicionarSaidaBeth.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                botaoAdicionarSaidaBethActionPerformed(evt);
+            }
+        });
+
+        jSeparator2.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
         javax.swing.GroupLayout formPanelLayout = new javax.swing.GroupLayout(formPanel);
         formPanel.setLayout(formPanelLayout);
         formPanelLayout.setHorizontalGroup(
             formPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(formPanelLayout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(12, 12, 12)
+                .addGroup(formPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel9, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(campoData, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
                 .addGroup(formPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel2)
+                    .addGroup(formPanelLayout.createSequentialGroup()
+                        .addComponent(radioManha)
+                        .addGap(18, 18, 18)
+                        .addComponent(radioTarde)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(formPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(formPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(formPanelLayout.createSequentialGroup()
                         .addGroup(formPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                            .addComponent(jLabel9, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(campoData)
                             .addComponent(campoEntrada, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(18, 18, 18)
-                        .addGroup(formPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(formPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(campoCartao, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
-                                .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                            .addComponent(jLabel2)
-                            .addGroup(formPanelLayout.createSequentialGroup()
-                                .addComponent(radioManha)
-                                .addGap(18, 18, 18)
-                                .addComponent(radioTarde))))
-                    .addGroup(formPanelLayout.createSequentialGroup()
+                        .addGroup(formPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(campoCartao)
+                            .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
                         .addGroup(formPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                            .addComponent(campoValorCaixa, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE))
+                            .addComponent(campoValorCaixa, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(18, 18, 18)
                         .addGroup(formPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(campoValorDisplay, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
-                            .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))))
-                .addGap(18, 18, 18)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 3, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addGroup(formPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(formPanelLayout.createSequentialGroup()
-                        .addComponent(jLabel7)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(campoTotalSaidas, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jLabel5)
-                    .addGroup(formPanelLayout.createSequentialGroup()
-                        .addComponent(scrollPaneSaidas, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(campoValorDisplay)
+                            .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, formPanelLayout.createSequentialGroup()
                         .addGroup(formPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(botaoRemoverSaida, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(botaoAdicionarSaida, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jLabel5)
+                            .addGroup(formPanelLayout.createSequentialGroup()
+                                .addComponent(scrollPaneSaidas, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(formPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(botaoRemoverSaida, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(botaoAdicionarSaida, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(formPanelLayout.createSequentialGroup()
+                                .addComponent(jLabel7)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(campoTotalSaidas, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(18, 18, 18)
+                        .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 3, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, Short.MAX_VALUE)
+                        .addGroup(formPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel6)
+                            .addGroup(formPanelLayout.createSequentialGroup()
+                                .addComponent(jLabel8)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(campoTotalSaidasBeth, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(formPanelLayout.createSequentialGroup()
+                                .addComponent(scrollPaneSaidasBeth, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(formPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(botaoRemoverSaidaBeth, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(botaoAdicionarSaidaBeth, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE))))))
+                .addContainerGap())
         );
         formPanelLayout.setVerticalGroup(
             formPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(formPanelLayout.createSequentialGroup()
                 .addContainerGap()
+                .addGroup(formPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(formPanelLayout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(formPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(radioManha)
+                            .addComponent(radioTarde)))
+                    .addGroup(formPanelLayout.createSequentialGroup()
+                        .addComponent(jLabel9)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(campoData, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(18, 18, 18)
+                .addGroup(formPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(formPanelLayout.createSequentialGroup()
+                        .addGap(20, 20, 20)
+                        .addGroup(formPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(formPanelLayout.createSequentialGroup()
+                                .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(campoCartao, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(formPanelLayout.createSequentialGroup()
+                                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(campoEntrada, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, formPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(formPanelLayout.createSequentialGroup()
+                            .addGap(66, 66, 66)
+                            .addComponent(campoValorCaixa, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(formPanelLayout.createSequentialGroup()
+                            .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(campoValorDisplay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addGap(18, 18, 18)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 3, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addGroup(formPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jSeparator2)
                     .addGroup(formPanelLayout.createSequentialGroup()
                         .addComponent(jLabel5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -319,43 +447,24 @@ public class MaisInfoFechamento extends javax.swing.JFrame {
                                 .addComponent(botaoAdicionarSaida, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(botaoRemoverSaida, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(scrollPaneSaidas, javax.swing.GroupLayout.PREFERRED_SIZE, 182, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(18, 18, Short.MAX_VALUE)
+                            .addComponent(scrollPaneSaidas, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
                         .addGroup(formPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel7)
                             .addComponent(campoTotalSaidas, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(formPanelLayout.createSequentialGroup()
-                        .addGroup(formPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(formPanelLayout.createSequentialGroup()
-                                .addComponent(jLabel2)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(formPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(radioManha)
-                                    .addComponent(radioTarde)))
-                            .addGroup(formPanelLayout.createSequentialGroup()
-                                .addComponent(jLabel9)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(campoData, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(18, 18, 18)
+                        .addComponent(jLabel6)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(formPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(formPanelLayout.createSequentialGroup()
-                                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(botaoAdicionarSaidaBeth, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(campoEntrada, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(formPanelLayout.createSequentialGroup()
-                                .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(campoCartao, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(botaoRemoverSaidaBeth, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(scrollPaneSaidasBeth, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(18, 18, 18)
-                        .addGroup(formPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(formPanelLayout.createSequentialGroup()
-                                .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(formPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(campoValorDisplay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(campoValorCaixa, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
-                    .addComponent(jSeparator1))
+                        .addGroup(formPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel8)
+                            .addComponent(campoTotalSaidasBeth, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -476,6 +585,14 @@ public class MaisInfoFechamento extends javax.swing.JFrame {
                             stringParaValor(String.valueOf(tabelaSaidas.getValueAt(i, 1)))
                     );
                 }
+                
+                SaidaBeth[] saidasBeth = new SaidaBeth[tabelaSaidasBeth.getRowCount()];
+                for (int i = 0; i < tabelaSaidasBeth.getRowCount(); i++){
+                    saidasBeth[i] = new SaidaBeth(
+                            String.valueOf(tabelaSaidasBeth.getValueAt(i, 0)),
+                            stringParaValor(String.valueOf(tabelaSaidasBeth.getValueAt(i, 1)))
+                    );
+                }
 
                 fechamento.setEntrada(stringParaValor(campoEntrada.getText()));
                 fechamento.setValorCaixa(stringParaValor(campoValorCaixa.getText()));
@@ -483,12 +600,15 @@ public class MaisInfoFechamento extends javax.swing.JFrame {
                 fechamento.setCartao(stringParaValor(campoCartao.getText()));
 
                 fechamento.setSaidas(saidas);
+                fechamento.setSaidasBeth(saidasBeth);
 
                 if (DAO.updateFechamento(fechamento)) {
                     this.editando = false;
 
                     enableBotoes(false);
                     camposEditaveis(false);
+                    
+                    menuPrincipal.resetTabelaDias();
 
                     botaoEditarInfo.setIcon(new ImageIcon(getClass().getResource("/icons/edit.png")));
                     botaoEditarInfo.setText("Editar Informações");
@@ -521,18 +641,29 @@ public class MaisInfoFechamento extends javax.swing.JFrame {
         botaoEditarInfo.setText("Editar Informações");
     }//GEN-LAST:event_botaoCancelarEdicaoActionPerformed
 
+    private void botaoRemoverSaidaBethActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botaoRemoverSaidaBethActionPerformed
+        removerLinhaTabela(tabelaSaidasBeth);
+    }//GEN-LAST:event_botaoRemoverSaidaBethActionPerformed
+
+    private void botaoAdicionarSaidaBethActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botaoAdicionarSaidaBethActionPerformed
+        adicionarLinhaTabela(tabelaSaidasBeth);
+    }//GEN-LAST:event_botaoAdicionarSaidaBethActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton botaoAdicionarSaida;
+    private javax.swing.JButton botaoAdicionarSaidaBeth;
     private javax.swing.JButton botaoCalcularDiferenca;
     private javax.swing.JButton botaoCancelarEdicao;
     private javax.swing.JButton botaoEditarInfo;
     private javax.swing.JButton botaoRemoverSaida;
+    private javax.swing.JButton botaoRemoverSaidaBeth;
     private javax.swing.JTextField campoCartao;
     private javax.swing.JFormattedTextField campoData;
     private javax.swing.JTextField campoDiferenca;
     private javax.swing.JTextField campoEntrada;
     private javax.swing.JTextField campoTotalSaidas;
+    private javax.swing.JTextField campoTotalSaidasBeth;
     private javax.swing.JTextField campoValorCaixa;
     private javax.swing.JTextField campoValorDisplay;
     private javax.swing.JPanel formPanel;
@@ -543,14 +674,19 @@ public class MaisInfoFechamento extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JSeparator jSeparator2;
     private javax.swing.JLabel labelId;
     private javax.swing.JRadioButton radioManha;
     private javax.swing.JRadioButton radioTarde;
     private javax.swing.JScrollPane scrollPaneSaidas;
+    private javax.swing.JScrollPane scrollPaneSaidasBeth;
     private javax.swing.JTable tabelaSaidas;
+    private javax.swing.JTable tabelaSaidasBeth;
     private javax.swing.ButtonGroup turnoButtonGroup;
     // End of variables declaration//GEN-END:variables
 }

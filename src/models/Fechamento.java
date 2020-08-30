@@ -6,8 +6,9 @@ public class Fechamento {
     private int turno; // 0 - manhã; 1 - tarde
     private float entrada, valorCaixa, valorDisplay, cartao;
     private Saida[] saidas;
+    private SaidaBeth[] saidasBeth;
 
-    public Fechamento(int idFechamento, int idDia, int turno, float entrada, float valorTotal, float valorDisplay, float cartao, Saida[] saidas) {
+    public Fechamento(int idFechamento, int idDia, int turno, float entrada, float valorTotal, float valorDisplay, float cartao, Saida[] saidas, SaidaBeth[] saidasBeth) {
         this.idFechamento = idFechamento;
         this.idDia = idDia;
         this.turno = turno;
@@ -16,27 +17,39 @@ public class Fechamento {
         this.valorDisplay = valorDisplay;
         this.cartao = cartao;
         this.saidas = saidas;
+        this.saidasBeth = saidasBeth;
     }
 
-    public Fechamento(int turno, float entrada, float valorTotal, float valorDisplay, float cartao, Saida[] saidas) {
+    public Fechamento(int turno, float entrada, float valorTotal, float valorDisplay, float cartao, Saida[] saidas, SaidaBeth[] saidasBeth) {
         this.turno = turno;
         this.entrada = entrada;
         this.valorCaixa = valorTotal;
         this.valorDisplay = valorDisplay;
         this.cartao = cartao;
         this.saidas = saidas;
+        this.saidasBeth = saidasBeth;
     }
-    
-    public float getValorTotal(){
-        return (valorCaixa + cartao - (entrada + this.getTotalSaidas()));
+
+    public float getValorTotal() {
+        return (valorCaixa + cartao + this.getTotalSaidasBeth() + this.getTotalSaidas() - entrada);
     }
-    
-    public float getTotalSaidas(){
+
+    public float getTotalSaidas() {
         float totalSaidas = 0;
-        for (Saida s: saidas)
+        for (Saida s : saidas) {
             totalSaidas += s.getValor();
-        
+        }
+
         return totalSaidas;
+    }
+
+    public float getTotalSaidasBeth() {
+        float totalSaidasBeth = 0;
+        for (SaidaBeth sb: saidasBeth){
+            totalSaidasBeth += sb.getValor();
+        }
+        
+        return totalSaidasBeth;
     }
 
     public int getIdFechamento() {
@@ -101,6 +114,14 @@ public class Fechamento {
 
     public void setSaidas(Saida[] saidas) {
         this.saidas = saidas;
+    }
+
+    public SaidaBeth[] getSaidasBeth() {
+        return saidasBeth;
+    }
+
+    public void setSaidasBeth(SaidaBeth[] saidasBeth) {
+        this.saidasBeth = saidasBeth;
     }
 
 }
