@@ -116,9 +116,8 @@ public class DAO {
             ps.setInt(1, fechamento.getIdFechamento());
 
             ps.executeUpdate();
-            
+
             insertSaidasBeth(conn, fechamento.getIdFechamento(), fechamento.getSaidasBeth());
-            
 
             conn.close();
 
@@ -221,17 +220,21 @@ public class DAO {
                     ps.setInt(1, idFechamentoManha);
                     rsFechamento = ps.executeQuery();
 
-                    fechamentoManha = new Fechamento(
-                            rsFechamento.getInt("idFechamento"),
-                            rsFechamento.getInt("idDia"),
-                            rsFechamento.getInt("turno"),
-                            rsFechamento.getFloat("entrada"),
-                            rsFechamento.getFloat("valorCaixa"),
-                            rsFechamento.getFloat("valorDisplay"),
-                            rsFechamento.getFloat("cartao"),
-                            selectSaidasFromFechamento(conn, idFechamentoManha),
-                            selectSaidasBethFromFechamento(conn, idFechamentoManha)
-                    );
+                    if (rsFechamento.next()) {
+                        fechamentoManha = new Fechamento(
+                                rsFechamento.getInt("idFechamento"),
+                                rsFechamento.getInt("idDia"),
+                                rsFechamento.getInt("turno"),
+                                rsFechamento.getFloat("entrada"),
+                                rsFechamento.getFloat("valorCaixa"),
+                                rsFechamento.getFloat("valorDisplay"),
+                                rsFechamento.getFloat("cartao"),
+                                selectSaidasFromFechamento(conn, idFechamentoManha),
+                                selectSaidasBethFromFechamento(conn, idFechamentoManha)
+                        );
+                    } else {
+                        fechamentoManha = null;
+                    }
                 } else {
                     fechamentoManha = null;
                 }
@@ -241,17 +244,21 @@ public class DAO {
                     ps.setInt(1, idFechamentoTarde);
                     rsFechamento = ps.executeQuery();
 
-                    fechamentoTarde = new Fechamento(
-                            rsFechamento.getInt("idFechamento"),
-                            rsFechamento.getInt("idDia"),
-                            rsFechamento.getInt("turno"),
-                            rsFechamento.getFloat("entrada"),
-                            rsFechamento.getFloat("valorCaixa"),
-                            rsFechamento.getFloat("valorDisplay"),
-                            rsFechamento.getFloat("cartao"),
-                            selectSaidasFromFechamento(conn, idFechamentoTarde),
-                            selectSaidasBethFromFechamento(conn, idFechamentoTarde)
-                    );
+                    if (rsFechamento.next()) {
+                        fechamentoTarde = new Fechamento(
+                                rsFechamento.getInt("idFechamento"),
+                                rsFechamento.getInt("idDia"),
+                                rsFechamento.getInt("turno"),
+                                rsFechamento.getFloat("entrada"),
+                                rsFechamento.getFloat("valorCaixa"),
+                                rsFechamento.getFloat("valorDisplay"),
+                                rsFechamento.getFloat("cartao"),
+                                selectSaidasFromFechamento(conn, idFechamentoTarde),
+                                selectSaidasBethFromFechamento(conn, idFechamentoTarde)
+                        );
+                    } else {
+                        fechamentoTarde = null;
+                    }
                 } else {
                     fechamentoTarde = null;
                 }
@@ -326,7 +333,7 @@ public class DAO {
                 ps.setFloat(3, sb.getValor());
                 ps.executeUpdate();
             }
-            
+
             return true;
         } catch (SQLException ex) {
             Logger.getLogger(DAO.class.getName()).log(Level.SEVERE, null, ex);
@@ -373,6 +380,55 @@ public class DAO {
             Logger.getLogger(DAO.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
+    }
+
+    public static boolean deleteFechamento(Fechamento fechamento) {
+        try {
+            Connection conn = DriverManager.getConnection(dbPath);
+
+            String sql = "DELETE FROM saida WHERE idFechamento = ?";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, fechamento.getIdFechamento());
+            ps.executeUpdate();
+
+            sql = "DELETE FROM saidaBeth WHERE idFechamento = ?";
+            ps = conn.prepareStatement(sql);
+            ps.setInt(1, fechamento.getIdFechamento());
+            ps.executeUpdate();
+
+            sql = "DELETE FROM fechamento WHERE idFechamento = ?";
+            ps = conn.prepareStatement(sql);
+            ps.setInt(1, fechamento.getIdFechamento());
+            ps.executeUpdate();
+
+            if (fechamento.getTurno() == 0) {
+                sql = "UPDATE dia SET idFechamentoManha = 0 WHERE idDia = ?";
+            } else {
+                sql = "UPDATE dia SET idFechamentoTarde = 0 WHERE idDia = ?";
+            }
+            ps = conn.prepareStatement(sql);
+            ps.setInt(1, fechamento.getIdDia());
+            ps.executeUpdate();
+
+            
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT idFechamentoManha, idFechamentoTarde FROM dia WHERE idDia = " + String.valueOf(fechamento.getIdDia()));
+            if (rs.getInt(1) == 0 && rs.getInt(2) == 0) {
+                sql = "DELETE FROM dia WHERE idDia = ?";
+                ps = conn.prepareStatement(sql);
+                ps.setInt(1, fechamento.getIdDia());
+                ps.executeUpdate();
+            }
+            
+
+            conn.close();
+
+            return true;
+        } catch (SQLException ex) {
+            Logger.getLogger(DAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return false;
     }
 
 }

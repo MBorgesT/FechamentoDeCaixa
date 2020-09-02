@@ -46,7 +46,7 @@ public class MaisInfoFechamento extends javax.swing.JFrame {
 
         botaoAdicionarSaida.setEnabled(b);
         botaoRemoverSaida.setEnabled(b);
-        
+
         botaoAdicionarSaidaBeth.setEnabled(b);
         botaoRemoverSaidaBeth.setEnabled(b);
 
@@ -75,13 +75,15 @@ public class MaisInfoFechamento extends javax.swing.JFrame {
     private void preencherTabelas() {
         DefaultTableModel saidaModel = (DefaultTableModel) tabelaSaidas.getModel();
         saidaModel.setRowCount(0);
-        for (Saida saida : fechamento.getSaidas()) 
+        for (Saida saida : fechamento.getSaidas()) {
             saidaModel.addRow(saida.saidaParaTabela());
-        
+        }
+
         DefaultTableModel saidaBethModel = (DefaultTableModel) tabelaSaidasBeth.getModel();
         saidaBethModel.setRowCount(0);
-        for (SaidaBeth sb : fechamento.getSaidasBeth())
+        for (SaidaBeth sb : fechamento.getSaidasBeth()) {
             saidaBethModel.addRow(sb.saidaParaTabela());
+        }
     }
 
     private float stringParaValor(String valor) {
@@ -104,7 +106,7 @@ public class MaisInfoFechamento extends javax.swing.JFrame {
         DefaultTableModel model = (DefaultTableModel) tabela.getModel();
         model.setRowCount(model.getRowCount() == 0 ? 0 : model.getRowCount() - 1);
     }
-    
+
     private void realizarCalculos() {
         float entrada = stringParaValor(campoEntrada.getText());
         float valorCaixa = stringParaValor(campoValorCaixa.getText());
@@ -113,14 +115,16 @@ public class MaisInfoFechamento extends javax.swing.JFrame {
 
         DefaultTableModel saidasModel = (DefaultTableModel) tabelaSaidas.getModel();
         float saida = 0;
-        for (int i = 0; i < saidasModel.getRowCount(); i++)
+        for (int i = 0; i < saidasModel.getRowCount(); i++) {
             saida += stringParaValor(String.valueOf(saidasModel.getValueAt(i, 1)));
+        }
         campoTotalSaidas.setText(valorParaString(saida));
-        
+
         DefaultTableModel saidasBethModel = (DefaultTableModel) tabelaSaidasBeth.getModel();
         float saidaBeth = 0;
-        for (int i = 0; i < saidasBethModel.getRowCount(); i++)
+        for (int i = 0; i < saidasBethModel.getRowCount(); i++) {
             saidaBeth += stringParaValor(String.valueOf(saidasBethModel.getValueAt(i, 1)));
+        }
         campoTotalSaidasBeth.setText(valorParaString(saidaBeth));
 
         float diferenca = (valorCaixa + saida + saidaBeth + cartao) - (entrada + valorDisplay);
@@ -169,9 +173,11 @@ public class MaisInfoFechamento extends javax.swing.JFrame {
         botaoCalcularDiferenca = new javax.swing.JButton();
         botaoEditarInfo = new javax.swing.JButton();
         botaoCancelarEdicao = new javax.swing.JButton();
+        botaoExcluirFechamento = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Novo Fechamento de Caixa");
+        setIconImage(new javax.swing.ImageIcon(getClass().getResource("/icons/caixa_registradora_48.png")).getImage());
         setResizable(false);
 
         formPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
@@ -506,26 +512,40 @@ public class MaisInfoFechamento extends javax.swing.JFrame {
             }
         });
 
+        botaoExcluirFechamento.setFont(new java.awt.Font("Noto Sans", 1, 14)); // NOI18N
+        botaoExcluirFechamento.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/delete.png"))); // NOI18N
+        botaoExcluirFechamento.setText("Excluir Fechamento");
+        botaoExcluirFechamento.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                botaoExcluirFechamentoActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(formPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addComponent(botaoCancelarEdicao)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(botaoEditarInfo))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(labelId, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(labelId, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(botaoCalcularDiferenca)
+                                .addGap(18, 18, 18)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel11)
+                                    .addComponent(campoDiferenca, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(formPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(botaoEditarInfo, javax.swing.GroupLayout.PREFERRED_SIZE, 194, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(37, 37, 37)
+                        .addComponent(botaoCancelarEdicao, javax.swing.GroupLayout.PREFERRED_SIZE, 194, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(botaoCalcularDiferenca)
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel11)
-                            .addComponent(campoDiferenca, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addComponent(botaoExcluirFechamento)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -544,8 +564,9 @@ public class MaisInfoFechamento extends javax.swing.JFrame {
                 .addComponent(formPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(botaoEditarInfo)
                     .addComponent(botaoCancelarEdicao)
-                    .addComponent(botaoEditarInfo))
+                    .addComponent(botaoExcluirFechamento))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -585,9 +606,9 @@ public class MaisInfoFechamento extends javax.swing.JFrame {
                             stringParaValor(String.valueOf(tabelaSaidas.getValueAt(i, 1)))
                     );
                 }
-                
+
                 SaidaBeth[] saidasBeth = new SaidaBeth[tabelaSaidasBeth.getRowCount()];
-                for (int i = 0; i < tabelaSaidasBeth.getRowCount(); i++){
+                for (int i = 0; i < tabelaSaidasBeth.getRowCount(); i++) {
                     saidasBeth[i] = new SaidaBeth(
                             String.valueOf(tabelaSaidasBeth.getValueAt(i, 0)),
                             stringParaValor(String.valueOf(tabelaSaidasBeth.getValueAt(i, 1)))
@@ -607,7 +628,7 @@ public class MaisInfoFechamento extends javax.swing.JFrame {
 
                     enableBotoes(false);
                     camposEditaveis(false);
-                    
+
                     menuPrincipal.resetTabelaDias();
 
                     botaoEditarInfo.setIcon(new ImageIcon(getClass().getResource("/icons/edit.png")));
@@ -631,7 +652,7 @@ public class MaisInfoFechamento extends javax.swing.JFrame {
 
     private void botaoCancelarEdicaoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botaoCancelarEdicaoActionPerformed
         this.editando = false;
-        
+
         enableBotoes(false);
         camposEditaveis(false);
         preencherCampos();
@@ -649,6 +670,26 @@ public class MaisInfoFechamento extends javax.swing.JFrame {
         adicionarLinhaTabela(tabelaSaidasBeth);
     }//GEN-LAST:event_botaoAdicionarSaidaBethActionPerformed
 
+    private void botaoExcluirFechamentoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botaoExcluirFechamentoActionPerformed
+        String[] options = {"SIM", "NÃO"};
+        int reply = JOptionPane.showOptionDialog(null, "Realmente deseja excluir o Fechamento de Caixa?", "Exclusão",
+                JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null,
+                options, options[0]);
+
+        if (reply == 0) {
+            if (DAO.deleteFechamento(fechamento)) {
+
+                JOptionPane.showMessageDialog(null, "Fechamento de Caixa excluido com sucesso.", "Informação", JOptionPane.INFORMATION_MESSAGE);
+
+                menuPrincipal.resetTabelaDias();
+
+                this.dispose();
+            } else {
+                JOptionPane.showMessageDialog(null, "Houve algum erro na exclusãod o Fechamento de Caixa. Favor reiniciar o programa e tentar novamente,", "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }//GEN-LAST:event_botaoExcluirFechamentoActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton botaoAdicionarSaida;
@@ -656,6 +697,7 @@ public class MaisInfoFechamento extends javax.swing.JFrame {
     private javax.swing.JButton botaoCalcularDiferenca;
     private javax.swing.JButton botaoCancelarEdicao;
     private javax.swing.JButton botaoEditarInfo;
+    private javax.swing.JButton botaoExcluirFechamento;
     private javax.swing.JButton botaoRemoverSaida;
     private javax.swing.JButton botaoRemoverSaidaBeth;
     private javax.swing.JTextField campoCartao;

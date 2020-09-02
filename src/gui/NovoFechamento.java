@@ -118,6 +118,7 @@ public class NovoFechamento extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Novo Fechamento de Caixa");
+        setIconImage(new javax.swing.ImageIcon(getClass().getResource("/icons/caixa_registradora_48.png")).getImage());
         setResizable(false);
 
         formPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
@@ -485,7 +486,7 @@ public class NovoFechamento extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(botaoCancelar)
                     .addComponent(botaoCadastrar))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(33, Short.MAX_VALUE))
         );
 
         pack();

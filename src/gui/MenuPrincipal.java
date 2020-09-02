@@ -110,6 +110,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Fechamento de Caixa");
+        setIconImage(new javax.swing.ImageIcon(getClass().getResource("/icons/caixa_registradora_48.png")).getImage());
         setResizable(false);
 
         tabelaFechamentos.setFont(new java.awt.Font("Noto Sans", 0, 14)); // NOI18N
