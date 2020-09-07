@@ -1,0 +1,1 @@
+BASE_FOLDER = '/home/matheus/arquivos-padaria/arquivos-caixa/'
